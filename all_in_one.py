@@ -775,9 +775,9 @@ class OfferParser:
         product["产品名称"] = part_number
 
         brand = self._identify_brand(part_number)
-        # 🦞 先搜精选 - 品牌名映射（中文->英文）
-        product["品牌"] = map_brand_name(brand)
-        product["厂家"] = map_brand_name(brand)
+        # 🦞 先搜精选 v4.2 - 强制映射为中文（带 part_number 参数）
+        product["品牌"] = map_brand_name(brand, part_number)
+        product["厂家"] = map_brand_name(brand, part_number)
 
         price_match = re.search(r"usd\s*(\d+\.?\d*)", line, re.IGNORECASE)
         if price_match:
@@ -943,8 +943,8 @@ class DetailedLineParser:
 
         brand = self._identify_brand(line)
         # 🦞 先搜精选 - 品牌名映射（中文->英文）
-        product["品牌"] = map_brand_name(brand)
-        product["厂家"] = map_brand_name(brand)
+        product["品牌"] = map_brand_name(brand, part_number)
+        product["厂家"] = map_brand_name(brand, part_number)
 
         upper_line = line.upper()
         for type_name, type_value in self.PRODUCT_TYPES.items():
@@ -1117,8 +1117,8 @@ class HKOfferParser:
             product["料号型号"] = part_number
             product["产品名称"] = f"{brand} {current_category or '存储芯片'} {part_number}"
             # 🦞 先搜精选 - 品牌名映射（中文->英文）
-            product["品牌"] = map_brand_name(brand)
-            product["厂家"] = map_brand_name(brand)
+            product["品牌"] = map_brand_name(brand, part_number)
+            product["厂家"] = map_brand_name(brand, part_number)
             product["产品分类"] = current_category or "存储芯片"
             
             # 价格
@@ -1305,8 +1305,8 @@ class HKStockParser:
         product["产品名称"] = part_number
         # 🦞 先搜精选 - 品牌名映射（中文->英文）
         brand = self._identify_brand(part_number)
-        product["品牌"] = map_brand_name(brand)
-        product["厂家"] = map_brand_name(brand)
+        product["品牌"] = map_brand_name(brand, part_number)
+        product["厂家"] = map_brand_name(brand, part_number)
         product["交货天数"] = 1
 
         dc_match = re.search(r"(\d{2})\s*\+", line)
@@ -1563,8 +1563,8 @@ class UniversalOfferParser:
             product["产品名称"] = part_number
             # 🦞 先搜精选 - 品牌名映射（中文->英文）
             brand = self._identify_brand(part_number)
-            product["品牌"] = map_brand_name(brand)
-            product["厂家"] = map_brand_name(brand)
+            product["品牌"] = map_brand_name(brand, part_number)
+            product["厂家"] = map_brand_name(brand, part_number)
 
             price_match = re.search(r"\$?([\d.]+)", line)
             if price_match:
@@ -1645,8 +1645,8 @@ class UniversalOfferParser:
         if product["料号型号"] and not product["品牌"]:
             # 🦞 先搜精选 - 品牌名映射（中文->英文）
             brand = self._identify_brand(product["料号型号"])
-            product["品牌"] = map_brand_name(brand)
-            product["厂家"] = map_brand_name(brand)
+            product["品牌"] = map_brand_name(brand, part_number)
+            product["厂家"] = map_brand_name(brand, part_number)
 
         if product["料号型号"]:
             product["产品名称"] = product["料号型号"]
