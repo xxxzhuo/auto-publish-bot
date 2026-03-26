@@ -77,8 +77,13 @@ def parse_and_publish(offer_text: str, parse_only: bool = False):
     print("【步骤 4/4】登录并上传")
     print("-" * 80)
     
+    # 🦞 先搜精选 - 支持动态手机号参数
+    phone = os.environ.get('PUBLISH_PHONE', '13798441628')
+    sms_code = os.environ.get('PUBLISH_SMS_CODE', '2222')
+    
     login_mgr = LoginManager()
-    success = login_mgr.login('13798441628', '2222')
+    success = login_mgr.login(phone, sms_code)
+    print(f"📱 使用手机号：{phone}")
     
     if not success:
         print("❌ 登录失败")

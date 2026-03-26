@@ -32,13 +32,14 @@ from pydantic import BaseModel
 # Config
 # ============================================================================
 
-# 🦞 先搜精选 - 默认手机号（可被动态参数覆盖）
-DEFAULT_PHONE_NUMBER = "13798441628"
-DEFAULT_SMS_CODE = "2222"
+# 🦞 先搜精选 v4.1 - 删除默认手机号，必须动态传入
+# 不再设置默认值，强制要求用户提供手机号
+REQUIRED_PHONE_NUMBER = None  # 必须动态传入
+REQUIRED_SMS_CODE = "2222"  # 默认验证码，可被覆盖
 
-# 兼容旧代码
-PHONE_NUMBER = DEFAULT_PHONE_NUMBER
-SMS_CODE = DEFAULT_SMS_CODE
+# 兼容旧代码（但不再使用默认值）
+PHONE_NUMBER = None
+SMS_CODE = REQUIRED_SMS_CODE
 
 BASE_URL = "http://129.204.124.204:89/dev-api"
 LOGIN_API = "/api/mts-api/login"
@@ -59,7 +60,7 @@ RUN_MODE = "REAL"
 
 
 # ============================================================================
-# 品牌名映射（英文 -> 中文）🦞 先搜精选
+# 品牌名映射（英文 -> 中文）🦞 先搜精选 - 强制映射
 # ============================================================================
 
 BRAND_NAME_MAPPING = {
@@ -89,21 +90,67 @@ BRAND_NAME_MAPPING = {
     "INTEL": "英特尔",
 }
 
+# 已知品牌前缀映射（用于强制映射）
+BRAND_PREFIX_MAPPING = {
+    "K4": "三星",
+    "K3": "三星",
+    "M32": "三星",
+    "KLM": "三星",
+    "H5": "海力士",
+    "H9": "海力士",
+    "MT4": "镁光",
+    "MT5": "镁光",
+    "MT6": "镁光",
+    "MT29": "镁光",
+    "NT5": "南亚",
+    "NT6": "南亚",
+    "D": "金士顿",
+    "KVR": "金士顿",
+    "GD": "兆易创新",
+    "W25": "华邦",
+    "W94": "华邦",
+    "P25": "晶存",
+    "29F": "英特尔",
+}
 
-def map_brand_name(brand: str) -> str:
-    """将英文品牌名映射为中文
+
+def map_brand_name(brand: str, part_number: str = None) -> str:
+    """强制将品牌名映射为中文
     
     Args:
         brand: 品牌名（可能是英文或中文）
+        part_number: 料号型号（用于辅助判断）
         
     Returns:
-        映射后的中文品牌名，如果没有映射或已是中文则返回原值
+        映射后的中文品牌名，强制返回中文
     """
     if not brand:
-        return brand
+        # 如果品牌为空，尝试从料号推断
+        if part_number:
+            for prefix, chinese_name in BRAND_PREFIX_MAPPING.items():
+                if part_number.startswith(prefix):
+                    return chinese_name
+        return "未知品牌"
+    
     brand = brand.strip()
-    # 🦞 先搜精选 - 英文品牌名映射为中文
-    return BRAND_NAME_MAPPING.get(brand, brand)
+    
+    # 🦞 先搜精选 - 强制映射为中文
+    # 1. 先尝试精确匹配
+    if brand in BRAND_NAME_MAPPING:
+        return BRAND_NAME_MAPPING[brand]
+    
+    # 2. 尝试忽略大小写匹配
+    brand_upper = brand.upper()
+    for key, value in BRAND_NAME_MAPPING.items():
+        if key.upper() == brand_upper:
+            return value
+    
+    # 3. 如果已经是中文，直接返回
+    if any('\u4e00' <= c <= '\u9fff' for c in brand):
+        return brand
+    
+    # 4. 未知英文品牌，返回原值（但这种情况应该很少）
+    return brand
 
 
 # ============================================================================
@@ -448,9 +495,12 @@ class LoginManager:
         self.user_info = None
 
     def login(self, mobile: Optional[str] = None, sms_code: Optional[str] = None) -> bool:
-        # 🦞 先搜精选 - 支持动态手机号，无参数时使用默认值
-        mobile = mobile or DEFAULT_PHONE_NUMBER
-        sms_code = sms_code or DEFAULT_SMS_CODE
+        # 🦞 先搜精选 v4.1 - 强制要求动态手机号，不再使用默认值
+        if not mobile:
+            print("❌ 错误：必须提供手机号")
+            return False
+        
+        sms_code = sms_code or REQUIRED_SMS_CODE
 
         if not mobile or not sms_code:
             print("❌ 错误：请配置手机号和短信验证码")
@@ -1860,9 +1910,12 @@ def run_main_pipeline() -> bool:
         print("-" * 60)
 
         login_mgr = LoginManager()
-        # 🦞 先搜精选 - 检查动态或默认手机号
-        if not mobile or not sms_code:
-            print("❌ 错误：请配置手机号和短信验证码")
+        # 🦞 先搜精选 v4.1 - 强制检查手机号
+        if not mobile:
+            print("❌ 错误：必须提供手机号，不支持默认值")
+            return False
+        if not sms_code:
+            print("❌ 错误：请提供短信验证码")
             return False
         if not BASE_URL or not LOGIN_API:
             print("❌ 错误：请配置 BASE_URL 和 LOGIN_API")
