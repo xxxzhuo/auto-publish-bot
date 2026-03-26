@@ -75,7 +75,7 @@ class AdvancedOfferParser:
     # 料号前缀识别品牌
     PART_BRAND_PREFIX = {
         'K4': 'Samsung', 'K8': 'Samsung', 'KLM': 'Samsung', 'M32': 'Samsung', 'MZ': 'Samsung', 'THG': 'Samsung',
-        'H5C': 'SK Hynix', 'H5AN': 'SK Hynix', 'H5HC': 'SK Hynix', 'H9C': 'SK Hynix', 'HMC': 'SK Hynix',
+        'H5': 'SK Hynix', 'H5C': 'SK Hynix', 'H5AN': 'SK Hynix', 'H5HC': 'SK Hynix', 'H5CG': 'SK Hynix', 'H9C': 'SK Hynix', 'HMC': 'SK Hynix',
         'MT4': 'Micron', 'MT5': 'Micron', 'MT6': 'Micron', 'MT29': 'Micron', '25Q': 'Micron',
         'NT5': '南亚科技 (Nanya)', 'NT6': '南亚科技 (Nanya)',
         'THGBM': 'KIOXIA',
