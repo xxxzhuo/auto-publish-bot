@@ -60,7 +60,6 @@ RUN_MODE = "REAL"
 
 
 # ============================================================================
-# 品牌名映射（英文 -> 中文）🦞 先搜精选 - 强制映射
 # ============================================================================
 
 BRAND_NAME_MAPPING = {
@@ -113,44 +112,6 @@ BRAND_PREFIX_MAPPING = {
     "29F": "英特尔",
 }
 
-
-def map_brand_name(brand: str, part_number: str = None) -> str:
-    """强制将品牌名映射为中文
-    
-    Args:
-        brand: 品牌名（可能是英文或中文）
-        part_number: 料号型号（用于辅助判断）
-        
-    Returns:
-        映射后的中文品牌名，强制返回中文
-    """
-    if not brand:
-        # 如果品牌为空，尝试从料号推断
-        if part_number:
-            for prefix, chinese_name in BRAND_PREFIX_MAPPING.items():
-                if part_number.startswith(prefix):
-                    return chinese_name
-        return "未知品牌"
-    
-    brand = brand.strip()
-    
-    # 🦞 先搜精选 - 强制映射为中文
-    # 1. 先尝试精确匹配
-    if brand in BRAND_NAME_MAPPING:
-        return BRAND_NAME_MAPPING[brand]
-    
-    # 2. 尝试忽略大小写匹配
-    brand_upper = brand.upper()
-    for key, value in BRAND_NAME_MAPPING.items():
-        if key.upper() == brand_upper:
-            return value
-    
-    # 3. 如果已经是中文，直接返回
-    if any('\u4e00' <= c <= '\u9fff' for c in brand):
-        return brand
-    
-    # 4. 未知英文品牌，返回原值（但这种情况应该很少）
-    return brand
 
 
 # ============================================================================
@@ -776,8 +737,8 @@ class OfferParser:
 
         brand = self._identify_brand(part_number)
         # 🦞 先搜精选 v4.2 - 强制映射为中文（带 part_number 参数）
-        product["品牌"] = map_brand_name(brand, part_number)
-        product["厂家"] = map_brand_name(brand, part_number)
+        product["品牌"] = brand
+        product["厂家"] = brand
 
         price_match = re.search(r"usd\s*(\d+\.?\d*)", line, re.IGNORECASE)
         if price_match:
@@ -943,8 +904,8 @@ class DetailedLineParser:
 
         brand = self._identify_brand(line)
         # 🦞 先搜精选 - 品牌名映射（中文->英文）
-        product["品牌"] = map_brand_name(brand, part_number)
-        product["厂家"] = map_brand_name(brand, part_number)
+        product["品牌"] = brand
+        product["厂家"] = brand
 
         upper_line = line.upper()
         for type_name, type_value in self.PRODUCT_TYPES.items():
@@ -1117,8 +1078,8 @@ class HKOfferParser:
             product["料号型号"] = part_number
             product["产品名称"] = f"{brand} {current_category or '存储芯片'} {part_number}"
             # 🦞 先搜精选 - 品牌名映射（中文->英文）
-            product["品牌"] = map_brand_name(brand, part_number)
-            product["厂家"] = map_brand_name(brand, part_number)
+            product["品牌"] = brand
+            product["厂家"] = brand
             product["产品分类"] = current_category or "存储芯片"
             
             # 价格
@@ -1305,8 +1266,8 @@ class HKStockParser:
         product["产品名称"] = part_number
         # 🦞 先搜精选 - 品牌名映射（中文->英文）
         brand = self._identify_brand(part_number)
-        product["品牌"] = map_brand_name(brand, part_number)
-        product["厂家"] = map_brand_name(brand, part_number)
+        product["品牌"] = brand
+        product["厂家"] = brand
         product["交货天数"] = 1
 
         dc_match = re.search(r"(\d{2})\s*\+", line)
@@ -1563,8 +1524,8 @@ class UniversalOfferParser:
             product["产品名称"] = part_number
             # 🦞 先搜精选 - 品牌名映射（中文->英文）
             brand = self._identify_brand(part_number)
-            product["品牌"] = map_brand_name(brand, part_number)
-            product["厂家"] = map_brand_name(brand, part_number)
+            product["品牌"] = brand
+            product["厂家"] = brand
 
             price_match = re.search(r"\$?([\d.]+)", line)
             if price_match:
@@ -1645,8 +1606,8 @@ class UniversalOfferParser:
         if product["料号型号"] and not product["品牌"]:
             # 🦞 先搜精选 - 品牌名映射（中文->英文）
             brand = self._identify_brand(product["料号型号"])
-            product["品牌"] = map_brand_name(brand, part_number)
-            product["厂家"] = map_brand_name(brand, part_number)
+            product["品牌"] = brand
+            product["厂家"] = brand
 
         if product["料号型号"]:
             product["产品名称"] = product["料号型号"]
