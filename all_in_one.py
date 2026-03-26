@@ -59,32 +59,50 @@ RUN_MODE = "REAL"
 
 
 # ============================================================================
-# 品牌名映射（中文 -> 英文）🦞 先搜精选
+# 品牌名映射（英文 -> 中文）🦞 先搜精选
 # ============================================================================
 
 BRAND_NAME_MAPPING = {
-    "三星": "Samsung",
-    "海力士": "SK Hynix",
-    "SK 海力士": "SK Hynix",
-    "镁光": "Micron",
-    "美光": "Micron",
-    "南亚": "Nanya",
-    "南亚科技": "Nanya",
-    "金士顿": "Kingston",
-    "金士": "Kingston",
-    "兆易创新": "GigaDevice",
-    "华邦": "Winbond",
-    "晶存": "Puya",
-    "英特尔": "Intel",
-    "intel": "Intel",
+    # 英文品牌名 -> 中文品牌名
+    "Samsung": "三星",
+    "SAMSUNG": "三星",
+    "samsung": "三星",
+    "SK Hynix": "海力士",
+    "SKHynix": "海力士",
+    "Hynix": "海力士",
+    "hynix": "海力士",
+    "Micron": "镁光",
+    "micron": "镁光",
+    "Nanya": "南亚",
+    "nanya": "南亚",
+    "Nanya Technology": "南亚科技",
+    "Kingston": "金士顿",
+    "kingston": "金士顿",
+    "GigaDevice": "兆易创新",
+    "gigadevice": "兆易创新",
+    "Winbond": "华邦",
+    "winbond": "华邦",
+    "Puya": "晶存",
+    "puya": "晶存",
+    "Intel": "英特尔",
+    "intel": "英特尔",
+    "INTEL": "英特尔",
 }
 
 
 def map_brand_name(brand: str) -> str:
-    """将中文品牌名映射为英文"""
+    """将英文品牌名映射为中文
+    
+    Args:
+        brand: 品牌名（可能是英文或中文）
+        
+    Returns:
+        映射后的中文品牌名，如果没有映射或已是中文则返回原值
+    """
     if not brand:
         return brand
     brand = brand.strip()
+    # 🦞 先搜精选 - 英文品牌名映射为中文
     return BRAND_NAME_MAPPING.get(brand, brand)
 
 
